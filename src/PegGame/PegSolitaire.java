@@ -10,8 +10,8 @@ public class PegSolitaire {
 
     static class Cell extends JButton {
         private int index;
-        private static ImageIcon peg;
-        private static ImageIcon Nopeg;
+        static ImageIcon peg;
+        static ImageIcon Nopeg;
 
         Cell() {}
         Cell(int idx) {index = idx;}
@@ -40,31 +40,32 @@ public class PegSolitaire {
     }
 
     static class CellActioner implements ActionListener {
-        private ArrayList<Cell> cellList;
         private Cell lastClickedCell;
-        CellActioner() {}
-        CellActioner(ArrayList<Cell> cells) {
-            cellList = cells;
-        }
+        private ArrayList<Cell> cellList;
 
+        CellActioner() {}
+        CellActioner(ArrayList<Cell> cellList) {
+            this.cellList = cellList;
+        }
+        void setCellList(ArrayList<Cell> cellList) {
+            this.cellList = cellList;
+        }
         @Override
         public void actionPerformed(ActionEvent e) {
             if(lastClickedCell == null) {
                 lastClickedCell = (Cell) e.getSource();
             } else {
                 var clickedCell = (Cell) e.getSource();
-                if (clickedCell.getIndex() == lastClickedCell.getIndex()+14) {
-                    clickedCell.setPeg();
-                    lastClickedCell.unsetPeg();
-                } else if (clickedCell.getIndex() == lastClickedCell.getIndex()-14) {
-                    clickedCell.setPeg();
-                    lastClickedCell.unsetPeg();
-                } else if (clickedCell.getIndex() == lastClickedCell.getIndex()-2) {
-                    clickedCell.setPeg();
-                    lastClickedCell.unsetPeg();
-                } else if (clickedCell.getIndex() == lastClickedCell.getIndex()+2) {
-                    clickedCell.setPeg();
-                    lastClickedCell.unsetPeg();
+                var lastIndx = lastClickedCell.getIndex();
+                var idxDiff = clickedCell.getIndex() - lastIndx;
+                switch (idxDiff) {
+                    case +14, -14, -2, +2 -> {
+                        var icon = (ImageIcon) clickedCell.getIcon();
+                        if (icon.equals(Cell.Nopeg) && cellList.get(clickedCell.getIndex()+Math.abs(idxDiff/2)).getIcon().equals(Cell.peg)) {
+                            clickedCell.setPeg();
+                            lastClickedCell.unsetPeg();
+                        }
+                    }
                 }
                 lastClickedCell = null;
             }
