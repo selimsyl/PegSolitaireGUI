@@ -19,16 +19,16 @@ public class Main {
 
         var panel = new JPanel(new GridLayout(7,7));
 
-        PegSolitaire.Cell.getImageIcons();
+//        PegSolitaire.Cell.getImageIcons();
 
-        ArrayList<PegSolitaire.Cell> cList = new ArrayList<>();
+        ArrayList<PegCell> cList = new ArrayList<>();
         for (int i =0; i < 49; ++i) {
-            var btn = new PegSolitaire.Cell(i,PegSolitaire.Cell.peg);
+            var btn = new PegCell(i,PegCell.peg);
             btn.setBackground(Color.white);
             cList.add(btn);
         }
 
-        PegSolitaire.CellActioner btnListener = new PegSolitaire.CellActioner(cList);
+        PegSolitaire.PegCellActioner btnListener = new PegSolitaire.PegCellActioner(cList);
 
         for (var btn : cList) {
             btn.addActionListener(btnListener);
@@ -38,10 +38,10 @@ public class Main {
         //Set white, red
         var btn = (JButton)panel.getComponent(0);
 //        btn.setIcon(WhiteIcon);
-        ((JButton)panel.getComponent(1)).setIcon(PegSolitaire.Cell.Nopeg);
-        ((JButton)panel.getComponent(8)).setIcon(PegSolitaire.Cell.Nopeg);
+        ((JButton)panel.getComponent(1)).setIcon(PegCell.Nopeg);
+        ((JButton)panel.getComponent(8)).setIcon(PegCell.Nopeg);
 //        ((JButton)panel.getComponent(15)).setIcon(WhiteIcon);
-        ((JButton)panel.getComponent(22)).setIcon(PegSolitaire.Cell.Nopeg);
+        ((JButton)panel.getComponent(22)).setIcon(PegCell.Nopeg);
 
 
         var panelC = new JPanel(new FlowLayout());
