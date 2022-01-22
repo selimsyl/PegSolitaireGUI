@@ -2,8 +2,9 @@ package PegGame;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.Serializable;
 
-public class ImageToIcon {
+public class ImageToIcon implements Serializable {
     private final String path;
 
     public ImageToIcon(String path) {this.path = path;}
