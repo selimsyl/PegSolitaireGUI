@@ -10,14 +10,14 @@ import java.io.*;
 import java.util.ArrayList;
 
 public class PegSolitaire implements Serializable {
-    private GameBoard board;
     private JFrame frame;
-    private JPanel boardPanel,radioPanel,controlButtonPanel;
-    private ArrayList<JButton> jButtons;
-    private ArrayList<JRadioButton> jRadioButtons;
+    private GameBoard boardPanel;
+    private JPanel radioPanel = new JPanel(new FlowLayout()),
+            controlButtonPanel = new JPanel(new FlowLayout());
+    private ArrayList<JButton> jButtons = new ArrayList<>();
+    private ArrayList<JRadioButton> jRadioButtons = new ArrayList<>();
 
-    PegSolitaire(GameBoard board) {
-        this.board = board;
+    PegSolitaire() {
         initGameWindow();
     }
 
@@ -26,7 +26,6 @@ public class PegSolitaire implements Serializable {
     }
 
     public void setBoard(GameBoard board) {
-        this.board = board;
         initGameWindow();
     }
 
@@ -38,7 +37,7 @@ public class PegSolitaire implements Serializable {
         try {
             f = new FileOutputStream(new File("SavedGame.txt"));
             o = new ObjectOutputStream(f);
-            o.writeObject(board);
+            o.writeObject(boardPanel);
             o.close();
             f.close();
         } catch (IOException e) {
@@ -52,13 +51,12 @@ public class PegSolitaire implements Serializable {
         try {
          fi = new FileInputStream(new File("SavedGame.txt"));
          oi = new ObjectInputStream(fi);
-            return (GameBoard) oi.readObject();
+            this.boardPanel = (GameBoard) oi.readObject();
         } catch (IOException e) {
             System.out.println("Error while loading...");
         } catch (ClassNotFoundException e) {
             System.out.println("Internal error, inform everyone including USA President");
         }
-        return null;
     }
 
     private void initGameWindow() {
@@ -79,30 +77,51 @@ public class PegSolitaire implements Serializable {
     }
 
     private void initBoardPanel() {
-        boardPanel = new JPanel(new GridLayout(board.getRowSize(),board.getColumnSize()));
+        var board = new BoardFact().makeBoard(BoardFact.BoardTypes.Tpype1);
+        boardPanel = new GameBoard(board);
+    }
 
-        for (var btn : board.getPegCellList()) {
-            boardPanel.add(btn);
-        }
+    private void addcontrolButton(String name,ActionListener actioner) {
+        var btn = new JButton(name);
+        btn.addActionListener(actioner);
+        jButtons.add(btn);
+        controlButtonPanel.add(btn);
+    }
+
+    private void resetGame() {
+
+    }
+
+    private void undo() {
+
     }
 
     private void initButtonsPanel() {
-        controlButtonPanel = new JPanel(new FlowLayout());
-        var btnActionListener = new GameButtonListener();
-        for (var btnName:new String[]{"Reset","Load","Save","Undo"}) {
-            var bnt = new JButton(btnName);
-            jButtons.add(bnt);
-            bnt.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    savetoFile();
-                }
-            });
-            controlButtonPanel.add(bnt);
-        }
+        addcontrolButton("Reset", new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                resetGame();
+            }
+        });
+        addcontrolButton("Load", new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                loadGame();
+            }
+        });
+        addcontrolButton("Save", new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                saveGame();
+            }
+        });
+        addcontrolButton("Undo", new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                undo();
+            }
+        });
 
-
-        radioPanel = new JPanel(new FlowLayout());
         var radioButtonGroup = new ButtonGroup();
         var btnItemListener = new GameRadioButtonListener();
         for (var btnName:new String[]{"Bord-Type-1","Bord-Type-2","Bord-Type-3",
@@ -111,25 +130,6 @@ public class PegSolitaire implements Serializable {
             btn.addItemListener(btnItemListener);
             radioButtonGroup.add(btn);
             radioPanel.add(btn);
-        }
-    }
-
-    private class GameButtonListener implements ActionListener,Serializable {
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            var btn = (JButton)e.getSource();
-            switch (btn.getName())
-            {
-                case "Reset" -> {
-                }
-                case "Load" -> {
-                }
-                case "Save" -> {
-                }
-                case "Undo" -> {
-                }
-            }
         }
     }
 

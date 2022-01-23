@@ -7,103 +7,64 @@ import java.awt.event.ActionListener;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-public abstract class GameBoard extends JPanel implements Serializable {
-    protected ArrayList<PegCell> PegCellList = new ArrayList<>();
-    protected ArrayList<Integer> unUsedPegCellListIndex = new ArrayList<>();
-    protected int rowSize;
-    protected int columnSize;
+public class GameBoard extends JPanel implements Serializable {
+
     protected PegCellActioner btnActioner;
+    protected Board.BoardBase board;
 
-    GameBoard(int rowSize, int columnSize) {
+    GameBoard(Board.BoardBase board) {
+        super(new GridLayout(board.rowSize,board.columnSize));
+        this.board = board;
         btnActioner = new PegCellActioner();
-        this.rowSize =rowSize;
-        this.columnSize = columnSize;
-        for (int i =0; i < rowSize*columnSize; ++i) {
-            var btn = new PegCell(i,PegCell.peg);
-            btn.setBackground(Color.white);
-            PegCellList.add(btn);
+        for (var btn:board.getPegCellList()) {
+            btn.addActionListener(btnActioner);
         }
-    }
 
-    protected void initUnusedPegs() {
-        for (var btn:PegCellList) {
-//            if (btn.isPeg())
-                btn.addActionListener(btnActioner);
-        }
-    }
-
-    public int getRowSize() {
-        return rowSize;
-    }
-
-    public void setRowSize(int rowSize) {
-        this.rowSize = rowSize;
-    }
-
-    public int getColumnSize() {
-        return columnSize;
-    }
-
-    public void setColumnSize(int columnSize) {
-        this.columnSize = columnSize;
-    }
-
-    public ArrayList<PegCell> getPegCellList() {
-        return PegCellList;
-    }
-
-    public void setPegCellList(ArrayList<PegCell> pegCellList) {
-        PegCellList = pegCellList;
-    }
-
-    protected void calcUnusedCells(int startIdx,int rowCnt,int columnCnt,int increase) {
-        for (int i=0;i<rowCnt;++i) {
-            for(int k=0;k<columnCnt;++k){
-                unUsedPegCellListIndex.add(startIdx + (i*increase) + k);
-            }
+        for (var btn : board.getPegCellList()) {
+            add(btn);
         }
     }
 
     private class PegCellActioner implements ActionListener,Serializable {
         private PegCell lastClickedPegCell;
 
-        PegCellActioner() {}
-
         @Override
         public void actionPerformed(ActionEvent e) {
-            if(!isCellValid(((PegCell)e.getSource()).getIndex())) {
-                lastClickedPegCell = null;
+            if(!board.isCellValid(((PegCell)e.getSource()).getIndex())) {
+//                lastClickedPegCell = null;
                 return;
             }
             if(lastClickedPegCell == null) {
-                lastClickedPegCell = (PegCell) e.getSource();
+                if (((PegCell) e.getSource()).isPeg())
+                    lastClickedPegCell = (PegCell) e.getSource();
             } else {
                 var clickedPegCell = (PegCell) e.getSource();
+
+                if (clickedPegCell.isPeg()) {
+                    lastClickedPegCell = null;
+                    return;
+                }
+
                 var lastIndx = lastClickedPegCell.getIndex();
                 var idxDiff = clickedPegCell.getIndex() - lastIndx;
-                if(isValidMove(idxDiff)){
-                        var icon = (ImageIcon) clickedPegCell.getIcon();
-                        if (icon.equals(PegCell.Nopeg) && PegCellList.get( lastClickedPegCell.getIndex()+idxDiff/2).getIcon().equals(PegCell.peg)) {
-                            clickedPegCell.setPeg();
-                            lastClickedPegCell.unsetPeg();
-                            PegCellList.get( lastClickedPegCell.getIndex()+idxDiff/2).unsetPeg();
-                        }
+
+                if(board.isValidMove(idxDiff)){
+                    var midCell = board.getCell( lastClickedPegCell.getIndex()+idxDiff/2);
+                    if (midCell.isPeg()) {
+                        clickedPegCell.setPeg();
+                        lastClickedPegCell.unsetPeg();
+                        midCell.unsetPeg();
+                    }
+//                    if (icon.equals(PegCell.Nopeg) && PegCellList.get( lastClickedPegCell.getIndex()+idxDiff/2).getIcon().equals(PegCell.peg)) {
+//                        clickedPegCell.setPeg();
+//                        lastClickedPegCell.unsetPeg();
+//                        PegCellList.get( lastClickedPegCell.getIndex()+idxDiff/2).unsetPeg();
+//                    }
                 }
                 lastClickedPegCell = null;
             }
         }
     }
-    boolean isCellValid(Integer idx) {
-        for (var index:unUsedPegCellListIndex) {
-            if (idx.equals(index))
-                return false;
-        }
-        return true;
-    }
-    boolean isValidMove(int no) {
-        return no==rowSize+columnSize ||
-                no==-(rowSize+columnSize) ||
-                no==2                 ||
-                no==-2;
-    }
+
+
 }
