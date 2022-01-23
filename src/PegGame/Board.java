@@ -2,11 +2,12 @@ package PegGame;
 
 import java.awt.*;
 import java.awt.event.ActionListener;
+import java.io.Serializable;
 import java.util.ArrayList;
 
 public class Board {
 
-    public abstract static class BoardBase {
+    public abstract static class BoardBase implements Serializable {
 
         public BoardBase(int rowSize, int columnSize) {
             this.rowSize =rowSize;
@@ -21,9 +22,7 @@ public class Board {
         public void initializeBoard() {
             for (var btnIdx:unUsedPegCellIndexList) {
                 PegCellList.get(btnIdx).setBackground(Color.lightGray);
-                PegCellList.get(btnIdx).setIcon(null);
-
-//                PegCellList.get(btnIdx).setBorder();
+                PegCellList.get(btnIdx).setUnused();
             }
         }
 

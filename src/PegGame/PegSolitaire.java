@@ -8,14 +8,17 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class PegSolitaire implements Serializable {
     private JFrame frame;
     private GameBoard boardPanel;
     private JPanel radioPanel = new JPanel(new FlowLayout()),
             controlButtonPanel = new JPanel(new FlowLayout());
-    private ArrayList<JButton> jButtons = new ArrayList<>();
     private ArrayList<JRadioButton> jRadioButtons = new ArrayList<>();
+    private Map<Integer,GameBoard> gameBoardTypeMap;
+    private Integer currentSelectedRadioButtonIdx;
 
     PegSolitaire() {
         initGameWindow();
@@ -26,7 +29,9 @@ public class PegSolitaire implements Serializable {
     }
 
     public void setBoard(GameBoard board) {
-        initGameWindow();
+        frame.remove(boardPanel);
+        boardPanel = board;
+        jRadioButtons.get(currentSelectedRadioButtonIdx).setSelected(true);
     }
 
     private void closeFrame() {frame.dispose();}
@@ -35,28 +40,46 @@ public class PegSolitaire implements Serializable {
         FileOutputStream f;
         ObjectOutputStream o;
         try {
-            f = new FileOutputStream(new File("SavedGame.txt"));
+            f = new FileOutputStream("SavedGame.txt");
             o = new ObjectOutputStream(f);
             o.writeObject(boardPanel);
+            o.writeObject(currentSelectedRadioButtonIdx);
+            boardPanel.repaint();
             o.close();
             f.close();
         } catch (IOException e) {
+            System.out.println(e.getMessage());
             System.out.println("Error while saving...");
         }
     }
 
+    private void refreshGame(GameBoard board) {
+        closeFrame();
+        setBoard(board);
+        initMainPanel();
+        run();
+    }
+
     private void loadGame() {
+        refreshGame(loadGameBoard());
+    }
+
+    private GameBoard loadGameBoard() {
         FileInputStream fi;
         ObjectInputStream oi;
         try {
-         fi = new FileInputStream(new File("SavedGame.txt"));
+         fi = new FileInputStream("SavedGame.txt");
          oi = new ObjectInputStream(fi);
-            this.boardPanel = (GameBoard) oi.readObject();
+            boardPanel = (GameBoard) oi.readObject();
+            currentSelectedRadioButtonIdx = (Integer) oi.readObject();
+            jRadioButtons.get(currentSelectedRadioButtonIdx).setSelected(true);
+            return boardPanel;
         } catch (IOException e) {
             System.out.println("Error while loading...");
         } catch (ClassNotFoundException e) {
             System.out.println("Internal error, inform everyone including USA President");
         }
+        return null;
     }
 
     private void initGameWindow() {
@@ -77,19 +100,25 @@ public class PegSolitaire implements Serializable {
     }
 
     private void initBoardPanel() {
-        var board = new BoardFact().makeBoard(BoardFact.BoardTypes.Tpype1);
-        boardPanel = new GameBoard(board);
+        gameBoardTypeMap = new TreeMap<>();
+        gameBoardTypeMap.put(0,new GameBoard(BoardFact.makeBoard(BoardFact.BoardTypes.Tpype1)));
+        gameBoardTypeMap.put(1,new GameBoard(BoardFact.makeBoard(BoardFact.BoardTypes.Tpype2)));
+        gameBoardTypeMap.put(2,new GameBoard(BoardFact.makeBoard(BoardFact.BoardTypes.Tpype3)));
+        gameBoardTypeMap.put(3,new GameBoard(BoardFact.makeBoard(BoardFact.BoardTypes.Tpype4)));
+        gameBoardTypeMap.put(4,new GameBoard(BoardFact.makeBoard(BoardFact.BoardTypes.Tpype5)));
+        gameBoardTypeMap.put(5,new GameBoard(BoardFact.makeBoard(BoardFact.BoardTypes.Tpype6)));
+        boardPanel = gameBoardTypeMap.get(0);
+        currentSelectedRadioButtonIdx = 0;
     }
 
     private void addcontrolButton(String name,ActionListener actioner) {
         var btn = new JButton(name);
         btn.addActionListener(actioner);
-        jButtons.add(btn);
         controlButtonPanel.add(btn);
     }
 
     private void resetGame() {
-
+        refreshGame(gameBoardTypeMap.get(currentSelectedRadioButtonIdx));
     }
 
     private void undo() {
@@ -130,6 +159,7 @@ public class PegSolitaire implements Serializable {
             btn.addItemListener(btnItemListener);
             radioButtonGroup.add(btn);
             radioPanel.add(btn);
+            jRadioButtons.add(btn);
         }
     }
 
@@ -138,20 +168,11 @@ public class PegSolitaire implements Serializable {
         @Override
         public void itemStateChanged(ItemEvent e) {
             var btn = (JRadioButton)e.getSource();
-            switch (btn.getName())
-            {
-                case "Bord-Type-1" :
-                    break;
-                case "Bord-Type-2" :
-                    break;
-                case "Bord-Type-3" :
-                    break;
-                case "Bord-Type-4" :
-                    break;
-                case "Bord-Type-5" :
-                    break;
-                case "Bord-Type-6" :
-                    break;
+            for (int i = 0; i < jRadioButtons.size();++i) {
+                if (jRadioButtons.get(i).equals(btn)) {
+                    refreshGame(gameBoardTypeMap.get(i));
+                    currentSelectedRadioButtonIdx = i;
+                }
             }
         }
     }

@@ -2,7 +2,7 @@ package PegGame;
 
 public class BoardFact {
     public enum BoardTypes {Tpype1,Tpype2,Tpype3,Tpype4,Tpype5,Tpype6};
-    public Board.BoardBase makeBoard(BoardTypes type) {
+    public static Board.BoardBase makeBoard(BoardTypes type) {
         Board.BoardBase board;
         switch (type) {
             case Tpype1: board = new Board.Board1(); break;

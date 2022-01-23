@@ -31,7 +31,6 @@ public class GameBoard extends JPanel implements Serializable {
         @Override
         public void actionPerformed(ActionEvent e) {
             if(!board.isCellValid(((PegCell)e.getSource()).getIndex())) {
-//                lastClickedPegCell = null;
                 return;
             }
             if(lastClickedPegCell == null) {
@@ -55,11 +54,6 @@ public class GameBoard extends JPanel implements Serializable {
                         lastClickedPegCell.unsetPeg();
                         midCell.unsetPeg();
                     }
-//                    if (icon.equals(PegCell.Nopeg) && PegCellList.get( lastClickedPegCell.getIndex()+idxDiff/2).getIcon().equals(PegCell.peg)) {
-//                        clickedPegCell.setPeg();
-//                        lastClickedPegCell.unsetPeg();
-//                        PegCellList.get( lastClickedPegCell.getIndex()+idxDiff/2).unsetPeg();
-//                    }
                 }
                 lastClickedPegCell = null;
             }
