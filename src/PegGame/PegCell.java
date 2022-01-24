@@ -35,6 +35,10 @@ public class PegCell extends JButton implements Serializable {
     return type == CellType.PEG;
   }
 
+  public boolean isNoPeg() {
+    return type == CellType.NOPEG;
+  }
+
   public void setUnused() {
     this.setIcon((null));
     type = CellType.UNUSED;

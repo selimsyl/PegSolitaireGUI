@@ -51,6 +51,23 @@ public class Board {
             return PegCellList;
         }
 
+        boolean isGameFinished() {
+            for (int i = 0; i < PegCellList.size(); ++i) {
+                if (PegCellList.get(i).isPeg()) {
+                    for (var diff: new int[]{-1, 1, rowSize, -rowSize}) {
+                        try {
+                            if (getCell(i + diff).isPeg() && getCell(i + 2 * diff).isNoPeg()) {
+                                return false;
+                            }
+                        }catch (IndexOutOfBoundsException e) {
+
+                        }
+                    }
+                }
+            }
+            return true;
+        }
+
         protected void calcUnusedCells(int startIdx,int rowCnt,int columnCnt,int increase) {
             for (int i=0;i<rowCnt;++i) {
                 for(int k=0;k<columnCnt;++k){

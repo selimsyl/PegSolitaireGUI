@@ -25,6 +25,10 @@ public class GameBoard extends JPanel implements Serializable {
         }
     }
 
+    boolean isGameFinished() {
+        return board.isGameFinished();
+    }
+
     private class PegCellActioner implements ActionListener,Serializable {
         private PegCell lastClickedPegCell;
 
@@ -53,6 +57,9 @@ public class GameBoard extends JPanel implements Serializable {
                         clickedPegCell.setPeg();
                         lastClickedPegCell.unsetPeg();
                         midCell.unsetPeg();
+                    }
+                    if(isGameFinished()) {
+                        JOptionPane.showMessageDialog(null,"GAME IS FINISHED");
                     }
                 }
                 lastClickedPegCell = null;

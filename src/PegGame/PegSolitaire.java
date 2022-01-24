@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
 
+import static java.awt.event.ItemEvent.SELECTED;
+
 public class PegSolitaire implements Serializable {
     private JFrame frame;
     private GameBoard boardPanel;
@@ -26,12 +28,12 @@ public class PegSolitaire implements Serializable {
 
     public void run() {
         frame.setVisible(true);
+//        jRadioButtons.get(currentSelectedRadioButtonIdx).setSelected(true);
     }
 
-    public void setBoard(GameBoard board) {
-        frame.remove(boardPanel);
-        boardPanel = board;
-        jRadioButtons.get(currentSelectedRadioButtonIdx).setSelected(true);
+    public void setBoard() {
+//        frame.remove(boardPanel);
+        boardPanel = gameBoardTypeMap.get(currentSelectedRadioButtonIdx);
     }
 
     private void closeFrame() {frame.dispose();}
@@ -53,18 +55,19 @@ public class PegSolitaire implements Serializable {
         }
     }
 
-    private void refreshGame(GameBoard board) {
+    private void refreshGame() {
         closeFrame();
-        setBoard(board);
+        setBoard();
         initMainPanel();
         run();
     }
 
     private void loadGame() {
-        refreshGame(loadGameBoard());
+        loadGameBoard();
+        refreshGame();
     }
 
-    private GameBoard loadGameBoard() {
+    private void loadGameBoard() {
         FileInputStream fi;
         ObjectInputStream oi;
         try {
@@ -72,14 +75,15 @@ public class PegSolitaire implements Serializable {
          oi = new ObjectInputStream(fi);
             boardPanel = (GameBoard) oi.readObject();
             currentSelectedRadioButtonIdx = (Integer) oi.readObject();
+            gameBoardTypeMap.put(currentSelectedRadioButtonIdx,boardPanel);
             jRadioButtons.get(currentSelectedRadioButtonIdx).setSelected(true);
-            return boardPanel;
+//            return loadBoard;
         } catch (IOException e) {
             System.out.println("Error while loading...");
         } catch (ClassNotFoundException e) {
             System.out.println("Internal error, inform everyone including USA President");
         }
-        return null;
+//        return null;
     }
 
     private void initGameWindow() {
@@ -101,12 +105,12 @@ public class PegSolitaire implements Serializable {
 
     private void initBoardPanel() {
         gameBoardTypeMap = new TreeMap<>();
-        gameBoardTypeMap.put(0,new GameBoard(BoardFact.makeBoard(BoardFact.BoardTypes.Tpype1)));
-        gameBoardTypeMap.put(1,new GameBoard(BoardFact.makeBoard(BoardFact.BoardTypes.Tpype2)));
-        gameBoardTypeMap.put(2,new GameBoard(BoardFact.makeBoard(BoardFact.BoardTypes.Tpype3)));
-        gameBoardTypeMap.put(3,new GameBoard(BoardFact.makeBoard(BoardFact.BoardTypes.Tpype4)));
-        gameBoardTypeMap.put(4,new GameBoard(BoardFact.makeBoard(BoardFact.BoardTypes.Tpype5)));
-        gameBoardTypeMap.put(5,new GameBoard(BoardFact.makeBoard(BoardFact.BoardTypes.Tpype6)));
+        gameBoardTypeMap.put(0,new GameBoard(BoardFact.makeBoard(0)));
+        gameBoardTypeMap.put(1,new GameBoard(BoardFact.makeBoard(1)));
+        gameBoardTypeMap.put(2,new GameBoard(BoardFact.makeBoard(2)));
+        gameBoardTypeMap.put(3,new GameBoard(BoardFact.makeBoard(3)));
+        gameBoardTypeMap.put(4,new GameBoard(BoardFact.makeBoard(4)));
+        gameBoardTypeMap.put(5,new GameBoard(BoardFact.makeBoard(5)));
         boardPanel = gameBoardTypeMap.get(0);
         currentSelectedRadioButtonIdx = 0;
     }
@@ -118,7 +122,9 @@ public class PegSolitaire implements Serializable {
     }
 
     private void resetGame() {
-        refreshGame(gameBoardTypeMap.get(currentSelectedRadioButtonIdx));
+        var btype = new GameBoard(BoardFact.makeBoard(currentSelectedRadioButtonIdx));
+        gameBoardTypeMap.put(currentSelectedRadioButtonIdx,btype);
+        refreshGame();
     }
 
     private void undo() {
@@ -156,6 +162,7 @@ public class PegSolitaire implements Serializable {
         for (var btnName:new String[]{"Bord-Type-1","Bord-Type-2","Bord-Type-3",
                                         "Bord-Type-4","Bord-Type-5","Bord-Type-6"}) {
             var btn = new JRadioButton(btnName);
+            if (btnName.equals("Bord-Type-1")) btn.setSelected(true);
             btn.addItemListener(btnItemListener);
             radioButtonGroup.add(btn);
             radioPanel.add(btn);
@@ -167,11 +174,14 @@ public class PegSolitaire implements Serializable {
 
         @Override
         public void itemStateChanged(ItemEvent e) {
-            var btn = (JRadioButton)e.getSource();
-            for (int i = 0; i < jRadioButtons.size();++i) {
-                if (jRadioButtons.get(i).equals(btn)) {
-                    refreshGame(gameBoardTypeMap.get(i));
-                    currentSelectedRadioButtonIdx = i;
+            if (e.getStateChange() == SELECTED) {
+                var btn = (JRadioButton) e.getSource();
+                for (int i = 0; i < jRadioButtons.size(); ++i) {
+                    if (jRadioButtons.get(i).equals(btn)) {
+                        currentSelectedRadioButtonIdx = i;
+                        refreshGame();
+                        break;
+                    }
                 }
             }
         }
