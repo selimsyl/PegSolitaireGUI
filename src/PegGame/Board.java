@@ -5,10 +5,20 @@ import java.awt.event.ActionListener;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+/**
+ * Board namespace includes board base type and board types
+ */
 public class Board {
 
+    /**
+     * Abstract board base type for common board operations
+     */
     public abstract static class BoardBase implements Serializable {
 
+        /**
+         * @param rowSize rowSize
+         * @param columnSize columnSize
+         */
         public BoardBase(int rowSize, int columnSize) {
             this.rowSize =rowSize;
             this.columnSize = columnSize;
@@ -19,6 +29,9 @@ public class Board {
             }
         }
 
+        /**
+         * Initializes board each JButton cell
+         */
         public void initializeBoard() {
             for (var btnIdx:unUsedPegCellIndexList) {
                 PegCellList.get(btnIdx).setBackground(Color.lightGray);
@@ -26,6 +39,10 @@ public class Board {
             }
         }
 
+        /**
+         * @param idx JButton cell index
+         * @return Jbutton is included in board or not
+         */
         public boolean isCellValid(Integer idx) {
             for (var index:unUsedPegCellIndexList) {
                 if (idx.equals(index))
@@ -34,6 +51,11 @@ public class Board {
             return true;
         }
 
+        /**
+         * @param no JButton cell index diff
+         * @return True if clicked Jbutton beging moved to valid position
+         * on board.
+         */
         public boolean isValidMove(int no) {
             return no==rowSize+columnSize ||
                     no==-(rowSize+columnSize) ||
@@ -41,22 +63,48 @@ public class Board {
                     no==-2;
         }
 
+        /**
+         * @param idx Index of JButton Cell
+         * @return Reference  to JButton Cell
+         */
         public PegCell getCell(int idx) {
             if (idx < 0 || idx > rowSize*columnSize)
                 throw new IndexOutOfBoundsException();
             return PegCellList.get(idx);
         }
 
+        /**
+         * @return Reference to JButton cell list
+         */
         public ArrayList<PegCell> getPegCellList() {
             return PegCellList;
         }
 
+        /**
+         * @param cellIdx cellIdx
+         * @param diff  diff
+         * @return True if cell is located either end or start of row
+         */
+        boolean checkCornerCases(int cellIdx,int diff) {
+            if (diff==1&&cellIdx!=1&&cellIdx!=columnSize+1)
+                return (cellIdx)%(columnSize) == columnSize-1;
+
+            if (diff==-1)
+                return (cellIdx)%(columnSize) == 0;
+            return false;
+        }
+
+        /**
+         * @return True if there is no more cell to be moved
+         */
         boolean isGameFinished() {
             for (int i = 0; i < PegCellList.size(); ++i) {
                 if (PegCellList.get(i).isPeg()) {
                     for (var diff: new int[]{-1, 1, rowSize, -rowSize}) {
                         try {
                             if (getCell(i + diff).isPeg() && getCell(i + 2 * diff).isNoPeg()) {
+                                if (checkCornerCases(i,diff))
+                                    continue;
                                 return false;
                             }
                         }catch (IndexOutOfBoundsException e) {
@@ -68,6 +116,12 @@ public class Board {
             return true;
         }
 
+        /**
+         * @param startIdx startIdx
+         * @param rowCnt rowCnt
+         * @param columnCnt columnCnt
+         * @param increase increase
+         */
         protected void calcUnusedCells(int startIdx,int rowCnt,int columnCnt,int increase) {
             for (int i=0;i<rowCnt;++i) {
                 for(int k=0;k<columnCnt;++k){
@@ -76,13 +130,32 @@ public class Board {
             }
         }
 
+        /**
+         * JButton Cell list
+         */
         protected ArrayList<PegCell> PegCellList = new ArrayList<>();
+        /**
+         * Unused JButton Cell indexes to seperate them
+         */
         protected ArrayList<Integer> unUsedPegCellIndexList = new ArrayList<>();
+        /**
+         * Board row size
+         */
         protected int rowSize;
+        /**
+         * Board column size
+         */
         protected int columnSize;
     }
 
+    /**
+     * Board Type One
+     */
     public static class Board1 extends BoardBase {
+        /**
+         * To set specific board shape unused sells
+         * is determined in no param ctor
+         */
         Board1() {
             super(7,7);
             unUsedPegCellIndexList.add(0);
@@ -102,7 +175,14 @@ public class Board {
         }
     }
 
+    /**
+     * Board Type Two
+     */
     public static class Board2 extends BoardBase {
+        /**
+         * To set specific board shape unused sells
+         * is determined in no param ctor
+         */
         Board2()
         {
             super(9,9);
@@ -114,7 +194,15 @@ public class Board {
             PegCellList.get(40).unsetPeg();
         }
     }
+
+    /**
+     * Board Type Three
+     */
     public static class Board3 extends BoardBase {
+        /**
+         * To set specific board shape unused sells
+         * is determined in no param ctor
+         */
         Board3()
         {
             super(8,8);
@@ -126,7 +214,15 @@ public class Board {
             PegCellList.get(35).unsetPeg();
         }
     }
+
+    /**
+     * Board Type Four
+     */
     public static class Board4 extends BoardBase {
+        /**
+         * To set specific board shape unused sells
+         * is determined in no param ctor
+         */
         Board4()
         {
             super(7,7);
@@ -139,7 +235,14 @@ public class Board {
         }
     }
 
+    /**
+     * Board Type Five
+     */
     public static class Board5 extends BoardBase {
+        /**
+         * To set specific board shape unused sells
+         * is determined in no param ctor
+         */
         Board5()
         {
             super(9,9);
@@ -192,7 +295,13 @@ public class Board {
 
     }
 
+    /**
+     * Board Type Six
+     */
     public static class Board6 extends BoardBase {
+        /**
+         * No Implemented
+         */
         Board6()
         { super(5,5); }
     }

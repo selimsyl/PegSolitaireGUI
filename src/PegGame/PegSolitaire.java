@@ -13,37 +13,79 @@ import java.util.TreeMap;
 
 import static java.awt.event.ItemEvent.SELECTED;
 
+/**
+ * Controls game flow
+ */
 public class PegSolitaire implements Serializable {
+    /**
+     * Main frame includes all game related gui objects
+     */
     private JFrame frame;
+    /**
+     * Game panel includes JButton cells
+     */
     private GameBoard boardPanel;
+    /**
+     * RadiButton panel includes radio panels
+     */
     private JPanel radioPanel = new JPanel(new FlowLayout()),
+    /**
+     * ControlButton includes control buttons
+     */
             controlButtonPanel = new JPanel(new FlowLayout());
+    /**
+     * RadiButton list
+     */
     private ArrayList<JRadioButton> jRadioButtons = new ArrayList<>();
+    /**
+     * Each board type can be played in same frame, to provide this
+     * all boards are created in the begining of game and switching done
+     * by radio buttons
+     */
     private Map<Integer,GameBoard> gameBoardTypeMap;
+    /**
+     * Current played board tpye index
+     */
     private Integer currentSelectedRadioButtonIdx;
 
+    /**
+     * Game save path
+     */
+    private final String gameSavePath = System.getProperty("user.dir")+"/saveFolder/SavedGame.txt";
+    /**
+     * No param ctor
+     */
     PegSolitaire() {
         initGameWindow();
     }
 
+    /**
+     * Set frame to visible
+     */
     public void run() {
+        frame.setLocationRelativeTo(null);
         frame.setVisible(true);
-//        jRadioButtons.get(currentSelectedRadioButtonIdx).setSelected(true);
     }
 
-    public void setBoard() {
-//        frame.remove(boardPanel);
+    /**
+     * Set current board type
+     */
+    private void setBoard() {
         boardPanel = gameBoardTypeMap.get(currentSelectedRadioButtonIdx);
     }
 
+    /**
+     * Close current frame
+     */
     private void closeFrame() {frame.dispose();}
 
+    /**
+     * Save current board and its index to "SavedGame.txt" file
+     */
     private void saveGame() {
-        FileOutputStream f;
-        ObjectOutputStream o;
         try {
-            f = new FileOutputStream("SavedGame.txt");
-            o = new ObjectOutputStream(f);
+            var f = new FileOutputStream(gameSavePath);
+            var o = new ObjectOutputStream(f);
             o.writeObject(boardPanel);
             o.writeObject(currentSelectedRadioButtonIdx);
             boardPanel.repaint();
@@ -55,6 +97,9 @@ public class PegSolitaire implements Serializable {
         }
     }
 
+    /**
+     * Refresh main frame
+     */
     private void refreshGame() {
         closeFrame();
         setBoard();
@@ -62,36 +107,44 @@ public class PegSolitaire implements Serializable {
         run();
     }
 
+    /**
+     * Load and refresh game from "SavedGame.txt" file
+     */
     private void loadGame() {
         loadGameBoard();
         refreshGame();
     }
 
+    /**
+     * Reads saved file and loads game
+     */
     private void loadGameBoard() {
-        FileInputStream fi;
-        ObjectInputStream oi;
         try {
-         fi = new FileInputStream("SavedGame.txt");
-         oi = new ObjectInputStream(fi);
+         var fi = new FileInputStream(gameSavePath);
+         var oi = new ObjectInputStream(fi);
             boardPanel = (GameBoard) oi.readObject();
             currentSelectedRadioButtonIdx = (Integer) oi.readObject();
             gameBoardTypeMap.put(currentSelectedRadioButtonIdx,boardPanel);
             jRadioButtons.get(currentSelectedRadioButtonIdx).setSelected(true);
-//            return loadBoard;
         } catch (IOException e) {
             System.out.println("Error while loading...");
         } catch (ClassNotFoundException e) {
             System.out.println("Internal error, inform everyone including USA President");
         }
-//        return null;
     }
 
+    /**
+     * Initializes panels and main frame
+     */
     private void initGameWindow() {
         initButtonsPanel();
         initBoardPanel();
         initMainPanel();
     }
 
+    /**
+     * Create main frame and add gui objects
+     */
     private void initMainPanel() {
         frame = new JFrame();
         var mainLayout = new BorderLayout(2,0);
@@ -103,6 +156,11 @@ public class PegSolitaire implements Serializable {
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
     }
 
+    /**
+     * Initialize all board types and add them to map
+     * to be used when switching between boards by
+     * radio buttons
+     */
     private void initBoardPanel() {
         gameBoardTypeMap = new TreeMap<>();
         gameBoardTypeMap.put(0,new GameBoard(BoardFact.makeBoard(0)));
@@ -115,22 +173,35 @@ public class PegSolitaire implements Serializable {
         currentSelectedRadioButtonIdx = 0;
     }
 
+    /**
+     * @param name Button name
+     * @param actioner Button action listener
+     */
     private void addcontrolButton(String name,ActionListener actioner) {
         var btn = new JButton(name);
         btn.addActionListener(actioner);
         controlButtonPanel.add(btn);
     }
 
+    /**
+     * Reset current board
+     */
     private void resetGame() {
         var btype = new GameBoard(BoardFact.makeBoard(currentSelectedRadioButtonIdx));
         gameBoardTypeMap.put(currentSelectedRadioButtonIdx,btype);
         refreshGame();
     }
 
+    /**
+     * Undo last move
+     */
     private void undo() {
-
+        boardPanel.undo();
     }
 
+    /**
+     * Initializes control buttons and radio buttons
+     */
     private void initButtonsPanel() {
         addcontrolButton("Reset", new ActionListener() {
             @Override
@@ -170,8 +241,14 @@ public class PegSolitaire implements Serializable {
         }
     }
 
+    /**
+     * Radio Button aciton listener
+     */
     private class GameRadioButtonListener implements ItemListener,Serializable {
 
+        /**
+         * @param e RadioButton action handler
+         */
         @Override
         public void itemStateChanged(ItemEvent e) {
             if (e.getStateChange() == SELECTED) {

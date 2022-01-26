@@ -1,6 +1,14 @@
 package PegGame;
 
+/**
+ * Board Creating handled in one place by
+ * factory methood pattern is used
+ */
 public class BoardFact {
+    /**
+     * @param type Board Type to be created
+     * @return BoardBase reference
+     */
     public static Board.BoardBase makeBoard(int type) {
         Board.BoardBase board;
         switch (type) {
